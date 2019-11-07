@@ -33,7 +33,7 @@
         }      
         
         vm.goBack = function(){
-            $state.go('events_list');
+            $state.go('list');
         }
 
         update();

@@ -77,7 +77,7 @@
                     function(event) {
                         if((event.url).startsWith(credentialsSrvc.redirectShort)) {
                             var authInfo = getAuthInfoFromUrl(event.url);
-                            localStorage.setItem("authInfo", authInfo);
+                            localStorage.setItem("authInfo", JSON.stringify(authInfo));
                             ref.close();
                             fnSuccess();
                         }
@@ -90,7 +90,20 @@
 
 
         service.getAuthInfo = function(){
-            return localStorage.getItem("authInfo");
+
+            var result = null;
+
+            try{
+                result = JSON.parse(localStorage.getItem("authInfo"));
+            }catch(e){
+                // ignore - will simply return null;
+            }
+
+            return result;
+        }
+
+        service.isAuthenticated = function(){
+            return !(getAuthInfo() == null);
         }
 
 

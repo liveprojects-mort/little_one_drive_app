@@ -2,20 +2,26 @@
     'use strict';
 
     angular
-        .module('eventsjs')
-        .controller('eventsListCtrl', control);
+        .module('mainjs')
+        .controller('listCtrl', control);
 
     control.$inject = [
         '$state',
-        'eventsSrvc'
+        'mainSrvc',
+        'authenticateSrvc'
         ];
     
     function control(
         $state,
-        eventsSrvc
+        mainSrvc,
+        authenticateSrvc
     ) {
+
+        
+
         var vm = angular.extend(this, {
-            events : []
+            items : [],
+            path : ""
          });
         
 
@@ -26,25 +32,33 @@
             // we're passing parameters into the new state
             // 'selected is an attribute in a parameter object, defined in the module definition
             // I'm going to write the destination controller, so it knows to look for an object with a 'selected' attribute
-            $state.go('events_detail', {selected: index});
+            $state.go('detail', {selected: index});
 
 
         }
 
-        vm.noEvents = function(){
-            return vm.events.length == 0;
+        vm.noItems = function(){
+            return vm.items.length == 0;
         }
 
-        vm.update = function(){
-            $state.go('events_update');
+        
+
+        vm.pathUpdate = function(path){
+
+            if(authenticateSrvc.getAuthInfo() == null){
+                alert("Press 'Authenticate'.");
+            }else{
+                $state.go('update',{path:path});
+            }
         }
 
         vm.authenticate = function(){
             $state.go('authenticate_intro');
         }
 
+        vm.path = mainSrvc.getPath();
 
-        vm.events = eventsSrvc.getEvents();
+        vm.items = mainSrvc.getItems();
               
     }
 })();

@@ -20,7 +20,7 @@
         
 
         vm.done = function(){
-            $state.go('events_list');
+            $state.go('list');
         }
 
         var params = $stateParams;

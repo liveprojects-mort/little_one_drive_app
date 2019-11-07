@@ -1,1 +1,7 @@
-/* Empty. Add your own CSS if you like */
+#pathBox{
+    width: 95%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0);
+    color: white;
+    margin-left: 5px;
+}

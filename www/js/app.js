@@ -6,7 +6,7 @@
 angular.module('starter', [
   'ionic',
   'momentjs', // ADDED used for dates
-  'eventsjs',  // ADDED our events module
+  'mainjs',  // ADDED our events module
   'authenticatejs' //ADDED our authentication module
 ])
 
@@ -36,7 +36,7 @@ angular.module('starter', [
 
 
       // ADDED START
-      $state.go("events_list");
+      $state.go("list");
       // ADDED END
 
     });

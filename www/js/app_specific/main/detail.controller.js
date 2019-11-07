@@ -2,19 +2,19 @@
     'use strict';
 
     angular
-        .module('eventsjs')
-        .controller('eventsDetailCtrl', control);
+        .module('mainjs')
+        .controller('detailCtrl', control);
 
     control.$inject = [
         '$state',
         '$stateParams',
-        'eventsSrvc'
+        'mainSrvc'
         ];
     
     function control(
         $state,
         $stateParams,
-        eventsSrvc
+        mainSrvc
     ) {
         var vm = angular.extend(this, {
             event : {
@@ -26,12 +26,12 @@
         
 
         vm.done = function(){
-            $state.go('events_list');
+            $state.go('list');
         }
 
         var params = $stateParams;
 
-        vm.event = eventsSrvc.getEventAt(params.selected);
+        vm.event = mainSrvc.getEventAt(params.selected);
 
         
 
