@@ -1,9 +1,33 @@
-# little_list
-a simple ionic + cordova app which displays a list of canned events, and navigates to a detail view for one of them
+# little_one_drive_app
+A simple (read: thrown-together) ionic + cordova app which builds on [little_list](https://github.com/AliceDigitalLabs/little_list).
+
+Comprises 2 modules: mainjs and authenticatejs
+
+**mainjs** provides list, update and detail states
+
+**authenticatejs** provides authenticate_intro and authenticate_secure states
+
+mainjs:list comes first and presents you with an input box in the header, and an authenticate button in the footer.
+
+The Authenticate button takes you to a OneDrive login. We have tested login against ...@ad.mmu.ac.uk accounts, which seem to work OK. The access token from the login is stored in local storage and is available from the authenticateSrvc.getAuthInfo() at any point afterward. Please note, we don't check for access token expiry; just hit authenticate again, when the download no long works... 
+
+Once back to the mains:list state again, the input box can be used to type a path. Data is fetched when the input box submits (hit return when you're typing)
+
+If you leave the input box empty, the root is assumed. The app moves to the mainjs:update to query the OneDrive API.
+
+If anything is found at the path, it is downloaded and checked for type. 
+
+If an array, it's assumed that the path is a folder, and the list is populated with the names of the items within it.
+
+If an object, it's assumed that the path is to a file, and the app moves to the mainjs:detail state, and simply attempts to put the data found into a detail view. Works great with text - not so great with video files ;-)
+
+The app is the barest of bones as we just needed it quickly - but it works, and shows how easily the list-detail paradigm of Ionic can be  purposed.
+
+Also shows how we can simply add new states and modules and move between them.
 
 ## Quick Start
 
-ionic cordova platform add android
+ionic cordova platform add android@6.3.0
 
 ionic cordova run android
 
@@ -14,7 +38,7 @@ ionic cordova run android
 
 #### Getting this working in MMU Student Windows 10
 
-You will find most of the apps needed to get LittleList to build and install on an android phone, but the OS set-up is a little idiosyncratic!
+You will find most of the apps needed to get this app to build and install on an android phone, but the OS set-up is a little idiosyncratic!
 
 Android Studio and Android SDK 26 are already installed
 MS VS Code is installed
@@ -30,7 +54,7 @@ npm install -g cordova
 * Install ionic
 ```
 npm install -g ionic@3.20.0
-```  
+```
 
 Note: The latest version (4.3) of the Ionic CLI contains a breaking change. Make sure you use the above version: 3.20.0
 
@@ -88,7 +112,7 @@ We're running version 4.10
  * Extract the contents of the .zip file here.
  * Note that you just installed the tool on your shared drive. This means you'll be able to build when you use another machine.
  * You now need to add the location of the Gradle binaries to your PATH environmnent variable:
- 
+
  For example:
  ```
  H:\Documents\Gradle\gradle-4.10.2\bin
@@ -97,9 +121,10 @@ We're running version 4.10
 
 * you will need to add the ionic v1 toolkit  package to the ionic CLI:
 (little_list is an ionic v1 project (yes, we're still using ionic v1 and angularjs. BECAUSE.))
+* also note, we're using v1.0.22 of the toolkit
 
 ```
-npm i -D @ionic/v1-toolkit
+npm i -D @ionic/v1-toolkit@1.0.22
 ```
 
 
@@ -127,8 +152,6 @@ adb devices
 
 * you should see an entry for your device.
 
-
-
 * Now give it a try:
 
 
@@ -137,7 +160,7 @@ ionic cordova run android
 ```
 
 
-* Hey, presto! Little list is now on your device. You can step through it using VSCode, too. But you will need Cordova Tools installed. Make sure you 'attach to running app'.
+* Hey, presto! the app is now on your device. You can step through it using VSCode, too. But you will need Cordova Tools installed. Make sure you 'attach to running app'.
 
 
 
