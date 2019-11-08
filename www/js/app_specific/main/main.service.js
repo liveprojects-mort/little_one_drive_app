@@ -82,7 +82,7 @@
 
         // Downloads file contents
         // download_uri : temporary authenticated uri for a file (retrieved from file meta data)  
-        function download_contents(download_uri) {
+        function downloadContents(download_uri) {
             return new Promise(function (resolve, reject) {
                 var download_request = new XMLHttpRequest();
                 download_request.onreadystatechange = function () {
@@ -99,7 +99,7 @@
             });
         }
 
-        function download_metadata(token, file_path) {
+        function downloadMetadata(token, file_path) {
             return new Promise(function (resolve, reject) {
                 var URI = "https://graph.microsoft.com/v1.0/me/drive/root:/" + file_path;
 
@@ -124,13 +124,13 @@
 
 
 
-        function download_folder(token, path) {
+        function downloadFolder(token, path) {
             return new Promise(function (resolve, reject) {
-                download_metadata(token, path).then(function (result) {
+                downloadMetadata(token, path).then(function (result) {
                     var response = JSON.parse(result[1]);
                     return response;
                 }).then(function (result) {
-                    download_contents(result["@microsoft.graph.downloadUrl"]).then(function (result) {
+                    downloadContents(result["@microsoft.graph.downloadUrl"]).then(function (result) {
                         resolve(result);
                     })
                 }).catch(function (error) {
@@ -157,7 +157,7 @@
             }
 
 
-            return downloadFolder(path, token);
+            return downloadFolder(token, path);
         }
 
         service.getPath = function(){

@@ -20,8 +20,16 @@
       var path = $stateParams.path;
 
         // TODO: Error Handling
-        mainSrvc.update(path).then(function(){
+        mainSrvc.update(path)
+        .then(
+            function(){
             $state.go('list');
-        });    
+        })
+        .catch(
+            function(error){
+                alert("Sorry, we couldn't reach that path!")
+                $state.go('list');
+            }
+        );    
     }
 })();
