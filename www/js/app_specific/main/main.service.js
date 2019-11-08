@@ -18,65 +18,14 @@
         moment,
         authenticateSrvc
     ) {
-        var itemArray = [];
-        var itemPath = "/"
+        
+        
+        var item = null;
+        
+        var itemPath = ""
         var service = {
 
         };
-
-        var PAUSE_FOR_A_WHILE_MS = 3000;
-        var NUM_DUMMY_EVENTS = 10;
-        
-
-
-        var createEvent = function (name, date, postcode) {
-
-            var result = {
-                name: name,
-                date: date,
-                postcode: postcode
-            }
-            return result;
-        }
-
-        var createDummyEvents = function (numToCreate) {
-            var result = [];
-
-            for (var index = 0; index < numToCreate; index++) {
-
-                var name = "event " + index;
-                var date = moment().add('years', index).toDate();
-                var postcode = "M1 5GD";
-
-                result.push(createEvent("event " + index, date, postcode));
-            }
-            return result;
-        }
-
-
-        var replaceWithRealCode = function () {
-            var deferred = $q.defer();
-
-            $timeout(
-                function () {
-                    itemArray = createDummyEvents(NUM_DUMMY_EVENTS);
-                    deferred.resolve(itemArray);
-                },
-                PAUSE_FOR_A_WHILE_MS);
-
-
-            return deferred.promise;
-        }
-
-        var promiseToUpdateEvents = function () {
-            // returns a promise
-            return replaceWithRealCode();
-        }
-
-        service.updateEvents = function () {
-            return promiseToUpdateEvents();
-        }
-
 
 
 
@@ -99,9 +48,11 @@
             });
         }
 
-        function downloadMetadata(token, file_path) {
+        function queryMetadata(token, uri) {
             return new Promise(function (resolve, reject) {
-                var URI = "https://graph.microsoft.com/v1.0/me/drive/root:/" + file_path;
+
+
+
 
                 var metaData_request = new XMLHttpRequest();
 
@@ -114,7 +65,7 @@
                         }
                     }
                 };
-                metaData_request.open("GET", URI, true);
+                metaData_request.open("GET", uri, true);
                 metaData_request.setRequestHeader("Authorization", "bearer " + token);
                 metaData_request.send();
             });
@@ -124,27 +75,68 @@
 
 
 
-        function downloadFolder(token, path) {
+
+
+
+        function queryPath(token, path) {
             return new Promise(function (resolve, reject) {
-                downloadMetadata(token, path).then(function (result) {
-                    var response = JSON.parse(result[1]);
-                    return response;
-                }).then(function (result) {
-                    downloadContents(result["@microsoft.graph.downloadUrl"]).then(function (result) {
-                        resolve(result);
-                    })
-                }).catch(function (error) {
-                    reject(error);
-                })
-            });
-        }
 
+                var uriStem = "https://graph.microsoft.com/v1.0/me/drive/root";
 
+                var rootComponent = "/children"; // special case
+                var uriComponent = rootComponent;
+                if((!path == null)||(path.length>0)){
+                    uriComponent = ":/" + path;
+                }
 
+                var uri = uriStem + uriComponent;
 
-        service.getItems = function () {
-            return angular.copy(itemArray);
-        }
+                queryMetadata(token, uri)
+                .then(function (response) {
+                    var result = JSON.parse(response[1]);   
+                    if(Array.isArray(result.value)){
+                        // this is the response of the root:/children endpoint
+                        // each array item looks like this:
+                        // {"createdDateTime":"2019-09-23T13:58:48Z","eTag":"\"{6E335610-8209-4FD4-B265-CD1626A346F6},1\"","id":"01GHONCGQQKYZW4CMC2RH3EZONCYTKGRXW","lastModifiedDateTime":"2019-09-23T13:58:48Z","name":"Appatella","webUrl":"https://stummuac-my.sharepoint.com/personal/55118836_ad_mmu_ac_uk/Documents/Appatella","cTag":"\"c:{6E335610-8209-4FD4-B265-CD1626A346F6},0\"","size":3154456,"createdBy":{"user":{"email":"L.Cooper@mmu.ac.uk","id":"2b378f77-5e47-4ee8-afcb-b5f8aa600bc4","displayName":"Laurie Cooper"}},"lastModifiedBy":{"user":{"email":"L.Cooper@mmu.ac.uk","id":"2b378f77-5e47-4ee8-afcb-b5f8aa600bc4","displayName":"Laurie Cooper"}},"parentReference":{"driveId":"b!wiFsUOXyAEyQGH3V6DHf8YXHIoDRXOxJhjN337XFN1Vdl-yWdkEPQbY4DeA8XwDt","driveType":"business","id":"01GHONCGV6Y2GOVW7725BZO354PWSELRRZ","path":"/drive/root:"},"fileSystemInfo":{"createdDateTime":"2019-09-23T13:58:48Z","lastModifiedDateTime":"2019-09-23T13:58:48Z"},"folder":{"childCount":5},"shared":{"scope":"users"}}
+                        resolve(result.value);
+                    }else{
+                        if(result.folder==null){
+                            downloadContents(result["@microsoft.graph.downloadUrl"])
+                            .then(
+                                function(result){
+                                    resolve(result[1]);
+                                }
+                            )
+                            .catch(
+                                function(error){
+                                    reject(error);
+                                });
+                        }else{
+                            queryMetadata(token,uri + ":/children")
+                            .then(
+                                function(response){
+                                    // we know this is an array
+                                    var children = JSON.parse(response[1]); 
+                                    resolve(children.value);  
+                                }
+                            )
+                            .catch(
+                                function(error){
+                                    reject(error);
+                                }
+                            )
+                        }
+                    }
+                })  
+                .catch(
+                    function (error) {
+                        reject(error);
+                    }
+                );
+            
+        });
+    }
+
 
         service.update = function (path) {
             var token = null;
@@ -157,11 +149,29 @@
             }
 
 
-            return downloadFolder(token, path);
+           return new Promise(function(resolve,reject){
+                queryPath(token, path)
+                .then(  
+                    function(response){
+                        item = response;
+                        itemPath = path;
+                        resolve(item);
+                    })
+                .catch(function(error){
+                    item = null;
+                    itemPath = "";
+                    reject(error);
+                });
+            }); 
         }
+
 
         service.getPath = function(){
             return itemPath;
+        }
+
+        service.getItem = function(){
+            return item;
         }
 
         return service;

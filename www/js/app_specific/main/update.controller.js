@@ -23,11 +23,15 @@
         mainSrvc.update(path)
         .then(
             function(){
-            $state.go('list');
+                if(Array.isArray(mainSrvc.getItem())){
+                    $state.go('list');
+                }else{
+                    $state.go('detail');
+                }
         })
         .catch(
             function(error){
-                alert("Sorry, we couldn't reach that path!")
+                alert("Sorry, we couldn't reach that path!");
                 $state.go('list');
             }
         );    

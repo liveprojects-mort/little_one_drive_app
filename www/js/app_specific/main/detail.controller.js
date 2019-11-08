@@ -7,32 +7,25 @@
 
     control.$inject = [
         '$state',
-        '$stateParams',
         'mainSrvc'
         ];
     
     function control(
         $state,
-        $stateParams,
         mainSrvc
     ) {
         var vm = angular.extend(this, {
-            event : {
-                name: "no name",
-                date: new Date(),
-                postcode : "no location"
-            }
+            detail : ""
          });
         
 
         vm.done = function(){
-            $state.go('list');
+            var path = vm.path.substr(0, vm.path.indexOf('/')); 
+            $state.go('update',{path:path});
         }
 
-        var params = $stateParams;
-
-        vm.event = mainSrvc.getEventAt(params.selected);
-
+        vm.detail = JSON.stringify(mainSrvc.getItem());
+        vm.path = mainSrvc.getPath();
         
 
     }
