@@ -22,7 +22,7 @@
         };
 
 
-
+        var GRACE_MS = 100000; // milliseconds to get stuff done before access token expires. 
 
 
 
@@ -47,9 +47,10 @@
                 return authInfo;
             }
 
+            
 
 
-
+            
             function popup(url) {
                 var width = 525,
                     height = 525,
@@ -70,14 +71,17 @@
                     "resizable=yes",
                     "toolbar=no",
                     "menubar=no",
+                    "clearcache=yes",
+                    "clearsessioncache=yes",
+                    "cleardata=yes",
                     "scrollbars=yes"];
 
-                var ref = window.open(url, "oauth", features.join(","));
+                var ref = window.open(url, "_blank", features.join(","));
                 ref.addEventListener('loadstart', 
                     function(event) {
                         if((event.url).startsWith(credentialsSrvc.redirectShort)) {
                             var authInfo = getAuthInfoFromUrl(event.url);
-                            localStorage.setItem("authInfo", JSON.stringify(authInfo));
+                            storeAuthInfo(authInfo);
                             ref.close();
                             fnSuccess();
                         }
@@ -87,9 +91,19 @@
             popup(url);
 
         }
+        function storeAuthInfo(authInfo){
 
+            if(!(authInfo == null)){
+                var currentTime_ms = new Date().getTime();
+                var expiresAt_ms = currentTime_ms + (authInfo.expires_in * 1000);
+                authInfo.expires_at_ms = expiresAt_ms;
+                localStorage.setItem("authInfo", JSON.stringify(authInfo));
+            }else{
+                localStorage.removeItem("authInfo");
+            }
+        }
 
-        service.getAuthInfo = function(){
+        function getAuthInfo(){
 
             var result = null;
 
@@ -102,15 +116,30 @@
             return result;
         }
 
-        service.isAuthenticated = function(){
-            return !(getAuthInfo() == null);
+        function isAuthenticated(){
+            var result = false;
+            try{
+                var authInfo = getAuthInfo();
+                if(!(authInfo==null)){
+                    var currentTime_ms = new Date().getTime();
+                    if (currentTime_ms + GRACE_MS < authInfo.expires_at_ms){
+                        result = true;
+                    }
+                }
+            }catch(e){}
+
+            return result;
+        }
+
+        function clear(){
+            storeAuthInfo(null);
         }
 
 
-        service.authenticate = function(){
+        function authenticate(){
 
             var deferred = $q.defer();
-
+            storeAuthInfo(null);
 
             $timeout(
                 function(){
@@ -126,6 +155,12 @@
 
 
         }
+
+        service.clear = clear;
+        service.getAuthInfo = getAuthInfo;
+        service.isAuthenticated = isAuthenticated;
+        service.authenticate = authenticate;
+
 
         return service;
 
