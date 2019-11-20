@@ -1,6 +1,6 @@
 {
-  "name": "little_list",
-  "version": "0.0.1",
+  "name": "little_one_drive",
+  "version": "0.0.2",
   "description": "An Ionic project",
   "devDependencies": {
     "gulp": "^3.5.6",

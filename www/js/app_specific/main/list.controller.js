@@ -41,7 +41,11 @@
         }
 
         vm.noItems = function () {
-            return vm.items.length == 0;
+            var result = true;
+            try{
+                result = vm.items.length == 0;
+            }catch(e){}
+            return result;
         }
 
 

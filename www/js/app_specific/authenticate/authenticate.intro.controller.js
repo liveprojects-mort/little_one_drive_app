@@ -21,8 +21,7 @@
         
         
          function update(){
-            vm.authInfo = authenticateSrvc.getAuthInfo();
-            vm.isLoggedIn = !(vm.authInfo == null);
+            vm.isLoggedIn = authenticateSrvc.isAuthenticated();
          }
 
         vm.login = function(){
@@ -30,7 +29,12 @@
               update,
               update
           );
-        }      
+        }     
+        
+        vm.logout = function(){
+            authenticateSrvc.clear();
+            update();
+          }   
         
         vm.goBack = function(){
             $state.go('list');

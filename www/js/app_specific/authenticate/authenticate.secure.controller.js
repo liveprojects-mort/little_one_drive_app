@@ -23,7 +23,6 @@
             $state.go('list');
         }
 
-        var params = $stateParams;
 
     }
 })();
